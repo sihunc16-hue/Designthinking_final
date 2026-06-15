@@ -1,0 +1,15 @@
+{
+  "name": "fiton",
+  "version": "1.0.0",
+  "description": "상황별 AI 코디 추천 쇼핑 서비스",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check public/app.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.22.2"
+  }
+}

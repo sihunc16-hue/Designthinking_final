@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitOn — 상황별 맞춤 코디 추천</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-top">
+      <div class="header-top-inner">
+        <a href="#" class="top-link">고객센터</a>
+        <a href="javascript:void(0)" class="top-link" onclick="openSpecModal()">MY 스펙</a>
+        <a href="#" class="top-link">내 코디</a>
+        <a href="#" class="top-link">로그인</a>
+        <button class="theme-toggle-btn" type="button" id="themeToggleBtn">다크모드</button>
+      </div>
+    </div>
+    <div class="header-main">
+      <div class="header-main-inner">
+        <div class="logo" onclick="showHomePage()">FitOn<span class="logo-dot"></span></div>
+        <nav class="nav">
+          <a href="javascript:void(0)" class="nav-link active" id="homeNav" onclick="showHomePage()">STYLE</a>
+          <a href="javascript:void(0)" class="nav-link cart-link" id="cartNav" onclick="showCartPage()" data-count="0">장바구니</a>
+          <a href="javascript:void(0)" class="nav-link" onclick="openSpecModal()">MY SPEC</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- CART PAGE -->
+  <section class="cart-page" id="cartPage" hidden>
+    <div class="cart-container">
+      <div class="cart-header">
+        <div>
+          <p class="cart-label">장바구니</p>
+          <h1 class="cart-title"><span id="cartItemCount">0</span>개의 상품이 담겨 있습니다</h1>
+        </div>
+        <button class="cart-back-link" type="button" onclick="showHomePage()">쇼핑 계속하기</button>
+      </div>
+
+      <div class="cart-body">
+        <section class="cart-items-panel">
+          <div class="cart-select-all">
+            <label><input type="checkbox" id="cartSelectAll" checked onchange="toggleSelectAll(this.checked)" /> 전체선택</label>
+            <span class="cart-note">선택된 상품만 주문됩니다.</span>
+          </div>
+          <div class="cart-items" id="cartItems"></div>
+        </section>
+
+        <aside class="order-summary-card">
+          <div class="summary-card-inner">
+            <p class="summary-label">주문 요약</p>
+            <div class="summary-row">
+              <span>상품 금액 합계</span>
+              <strong id="summarySubtotal">0원</strong>
+            </div>
+            <div class="summary-row">
+              <span>배송비</span>
+              <strong id="summaryShipping">0원</strong>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-total">
+              <span>최종 결제 금액</span>
+              <strong id="summaryTotal">0원</strong>
+            </div>
+            <button class="order-btn" type="button" onclick="handleOrder()">주문하기</button>
+            <button class="continue-btn" type="button" onclick="showHomePage()">쇼핑 계속하기</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">PERSONALIZED OUTFIT RECOMMENDATION</p>
+      <h1 class="hero-title">상황별 완벽 코디, 지금 바로 찾아보세요!</h1>
+      <p class="hero-sub">내 스펙과 취향을 고려한 스트릿 캐주얼 추천을 빠르게 확인해보세요.</p>
+
+      <!-- 내 스펙 요약 카드 -->
+      <div class="user-spec-summary-bar" id="userSpecSummaryBar">
+        <div class="spec-summary-left" onclick="openSpecModal(event)">
+          <span class="spec-indicator-dot"></span>
+          <span class="spec-text" id="userSpecSummaryText">내 스펙을 등록하고 맞춤 추천을 받아보세요.</span>
+        </div>
+        <div class="spec-summary-actions">
+          <button class="spec-toggle-btn spec-toggle-on" type="button" id="specToggleBtn" onclick="toggleSpecEnabled(event)">스펙 적용 ON</button>
+          <button class="spec-edit-btn" type="button" onclick="openSpecModal(event)">설정</button>
+        </div>
+      </div>
+
+      <!-- AI 자연어 검색 -->
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg class="search-icon-svg" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder='원하는 코디 스타일을 검색해보세요. (예: "대학생 개강룩", "하객 세미포멀")'
+          />
+          <button class="search-btn" onclick="handleAISearch()">검색</button>
+        </div>
+      </div>
+
+      <div class="planner-panel">
+        <div class="planner-row">
+          <div class="planner-group">
+            <label class="planner-label" for="budgetInput">최대 예산</label>
+            <div class="budget-input-wrap">
+              <input
+                type="number"
+                id="budgetInput"
+                class="budget-input"
+                min="0"
+                step="1000"
+                placeholder="예: 50000"
+              />
+              <span class="budget-unit">원 이하</span>
+            </div>
+            <div class="budget-presets">
+              <button class="planner-chip" type="button" onclick="setBudgetPreset(30000)">3만원</button>
+              <button class="planner-chip" type="button" onclick="setBudgetPreset(50000)">5만원</button>
+              <button class="planner-chip" type="button" onclick="setBudgetPreset(100000)">10만원</button>
+              <button class="planner-chip" type="button" onclick="setBudgetPreset(0)">제한 없음</button>
+            </div>
+          </div>
+
+          <div class="planner-group">
+            <span class="planner-label">스타일</span>
+            <div class="style-chips" id="styleChips">
+              <button class="planner-chip active" type="button" data-style="베이직" onclick="selectStyle('베이직', this)">베이직</button>
+              <button class="planner-chip" type="button" data-style="스포티" onclick="selectStyle('스포티', this)">스포티</button>
+              <button class="planner-chip" type="button" data-style="러블리" onclick="selectStyle('러블리', this)">러블리</button>
+              <button class="planner-chip" type="button" data-style="스트릿" onclick="selectStyle('스트릿', this)">스트릿</button>
+              <button class="planner-chip" type="button" data-style="포멀" onclick="selectStyle('포멀', this)">포멀</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="planner-group planner-group-wide">
+          <span class="planner-label">가격 필터</span>
+          <div class="style-chips" id="priceFilterChips">
+            <button class="planner-chip active" type="button" data-price-filter="all" onclick="selectPriceFilter('all', this)">전체</button>
+            <button class="planner-chip" type="button" data-price-filter="under20000" onclick="selectPriceFilter('under20000', this)">2만원 이하</button>
+            <button class="planner-chip" type="button" data-price-filter="between20000_50000" onclick="selectPriceFilter('between20000_50000', this)">2만~5만원</button>
+            <button class="planner-chip" type="button" data-price-filter="between50000_100000" onclick="selectPriceFilter('between50000_100000', this)">5만~10만원</button>
+            <button class="planner-chip" type="button" data-price-filter="over100000" onclick="selectPriceFilter('over100000', this)">10만원 이상</button>
+          </div>
+        </div>
+
+        <button class="planner-apply-btn" type="button" onclick="applyPlannerFilters()">조건으로 추천 받기</button>
+      </div>
+
+      <!-- 상황 칩 (트렌디한 카테고리) -->
+      <div class="situation-chips" id="situationChips">
+        <button class="chip active" data-situation="개강룩" onclick="selectSituation('개강룩', this)">🎓 개강룩</button>
+        <button class="chip" data-situation="MT/수련회" onclick="selectSituation('MT/수련회', this)">🎒 MT/수련회</button>
+        <button class="chip" data-situation="체육대회" onclick="selectSituation('체육대회', this)">🏃 체육대회</button>
+        <button class="chip" data-situation="졸업식" onclick="selectSituation('졸업식', this)">🎓 졸업식</button>
+        <button class="chip" data-situation="데이트룩" onclick="selectSituation('데이트룩', this)">💕 데이트룩</button>
+        <button class="chip" data-situation="소개팅" onclick="selectSituation('소개팅', this)">💌 소개팅</button>
+        <button class="chip" data-situation="친구 만남" onclick="selectSituation('친구 만남', this)">👯 친구 만남</button>
+        <button class="chip" data-situation="결혼식 하객" onclick="selectSituation('결혼식 하객', this)">👗 결혼식 하객</button>
+        <button class="chip" data-situation="페스티벌" onclick="selectSituation('페스티벌', this)">🎵 페스티벌</button>
+        <button class="chip" data-situation="콘서트" onclick="selectSituation('콘서트', this)">🎤 콘서트</button>
+        <button class="chip" data-situation="놀이공원" onclick="selectSituation('놀이공원', this)">🎡 놀이공원</button>
+        <button class="chip" data-situation="한강 피크닉" onclick="selectSituation('한강 피크닉', this)">🌸 한강 피크닉</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI 코멘트 배너 -->
+  <div class="ai-banner" id="aiBanner">
+    <div class="ai-banner-inner">
+      <span class="ai-dot"></span>
+      <p class="ai-comment" id="aiComment">수련회 코디 추천 중 — 활동하기 편하고 단체사진에도 예쁜 룩을 찾고 있어요</p>
+    </div>
+  </div>
+
+  <!-- 결과 섹션 -->
+  <main class="main">
+    <div class="result-header">
+      <div>
+        <h2 class="result-title" id="resultTitle">수련회 인기 코디</h2>
+        <p class="result-sub" id="resultSub">실구매 데이터 기반 · 네이버 쇼핑 연동</p>
+      </div>
+      <div class="sort-wrap">
+        <select class="sort-select" onchange="sortResults(this.value)">
+          <option value="sim">관련도순</option>
+          <option value="date">최신순</option>
+          <option value="asc">낮은가격순</option>
+          <option value="dsc">높은가격순</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="recommendation-summary" id="recommendationSummary">
+      상황 수련회 · 스타일 베이직 · 예산 제한 없음
+    </div>
+
+    <!-- 이 상황 인기 코디 섹션 -->
+    <section class="outfit-section" id="outfitSection" hidden>
+      <div class="outfit-section-header">
+        <div>
+          <h3 class="outfit-section-title">이 상황 인기 코디</h3>
+          <p class="outfit-section-sub">지금 선택한 상황에 딱 맞는 코디 세트를 한눈에 확인하세요.</p>
+        </div>
+      </div>
+      <div class="optimization-summary" id="optimizationSummary"></div>
+      <div class="outfit-grid" id="outfitGrid"></div>
+    </section>
+
+    <!-- 보유 의류 등록 섹션 -->
+    <section class="wardrobe-section">
+      <div class="wardrobe-header">
+        <div>
+          <h3 class="wardrobe-title">보유 의류 등록</h3>
+          <p class="wardrobe-sub">내 옷을 등록해두면 추천 코디 조합에 우선 활용됩니다.</p>
+        </div>
+      </div>
+
+      <div class="wardrobe-form">
+        <select id="ownedCategory" class="wardrobe-select">
+          <option value="top">상의</option>
+          <option value="bottom">하의</option>
+          <option value="outer">아우터</option>
+          <option value="shoes">신발</option>
+          <option value="bag">가방</option>
+          <option value="accessory">액세서리</option>
+          <option value="dress">원피스/셋업</option>
+        </select>
+        <input id="ownedName" class="wardrobe-input" type="text" placeholder="예: 흰색 반팔 티셔츠" />
+        <input id="ownedNote" class="wardrobe-input" type="text" placeholder="메모: 오버핏, 검정 라인" />
+        <button class="wardrobe-add-btn" type="button" onclick="addOwnedClothing()">등록</button>
+      </div>
+
+      <div class="wardrobe-list" id="wardrobeList"></div>
+    </section>
+
+    <!-- 추천 상품 섹션 -->
+    <section class="product-recommendation-section">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">추천 상품</h3>
+          <p class="section-sub">상의·하의·아우터·신발·악세서리로 빠르게 필터링해보세요.</p>
+        </div>
+      </div>
+      <div class="filter-tabs" id="productFilterTabs">
+        <button class="filter-tab active" data-category="all" onclick="selectProductCategory('all', this)">전체</button>
+        <button class="filter-tab" data-category="top" onclick="selectProductCategory('top', this)">상의</button>
+        <button class="filter-tab" data-category="bottom" onclick="selectProductCategory('bottom', this)">하의</button>
+        <button class="filter-tab" data-category="outer" onclick="selectProductCategory('outer', this)">아우터</button>
+        <button class="filter-tab" data-category="shoes" onclick="selectProductCategory('shoes', this)">신발</button>
+        <button class="filter-tab" data-category="accessory" onclick="selectProductCategory('accessory', this)">악세서리</button>
+      </div>
+    </section>
+
+    <!-- 로딩 -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>코디를 분석하고 있습니다...</p>
+    </div>
+
+    <!-- 에러 -->
+    <div class="error-box" id="errorBox" style="display:none;">
+      <p><span id="errorMsg"></span></p>
+      <p style="margin-top:8px; font-size:13px; color:#666;">서버가 실행 중인지 확인해주세요 (node server.js)</p>
+    </div>
+
+    <!-- 상품 그리드 -->
+    <div class="product-grid" id="productGrid"></div>
+
+    <!-- 인기 검색 키워드 -->
+    <section class="keyword-section">
+      <div class="keyword-header">
+        <h3 class="keyword-title">인기 검색 키워드</h3>
+      </div>
+      <div class="keyword-tags" id="keywordTags"></div>
+    </section>
+
+    <!-- 더보기 -->
+    <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+      <button class="load-more-btn" onclick="loadMore()">더 보기</button>
+    </div>
+  </main>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="detail-modal-overlay" id="productDetailModal" style="display:none;" onclick="closeProductDetail()">
+    <div class="detail-modal-card" onclick="event.stopPropagation()">
+      <button class="detail-close-btn" onclick="closeProductDetail()" aria-label="닫기">×</button>
+      <div class="detail-modal-body">
+        <div class="detail-image-wrap">
+          <img id="detailImage" src="" alt="상품 이미지" />
+        </div>
+        <div class="detail-info">
+          <div class="detail-meta">
+            <span class="detail-tag" id="detailBrand">브랜드</span>
+            <span class="detail-tag" id="detailMall">쇼핑몰</span>
+            <span class="detail-tag" id="detailCategory">카테고리</span>
+          </div>
+          <h2 class="detail-title" id="detailTitle">상품명</h2>
+          <p class="detail-description" id="detailDescription">상품 설명</p>
+          <p class="detail-reason" id="detailReason">추천 이유</p>
+          <div class="detail-price-row">
+            <span class="detail-price" id="detailPrice">가격</span>
+            <span class="detail-price-orig" id="detailOriginalPrice">원가</span>
+            <span class="detail-discount" id="detailDiscount"></span>
+          </div>
+          <a id="detailLinkBtn" class="detail-link-btn" href="#" target="_blank" rel="noopener noreferrer">네이버 쇼핑으로 이동</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo" style="font-size:20px; margin-bottom: 8px;">FitOn</div>
+      <p>상황별 맞춤 코디 추천 서비스 · 네이버 쇼핑 API 연동</p>
+      <p style="margin-top:6px; font-size:12px; opacity:0.5;">© 2025 FitOn. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- SPEC MODAL -->
+  <div class="modal-overlay" id="specModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">MY 스펙 설정</h3>
+        <button class="modal-close-btn" onclick="closeSpecModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">성별, 연령대, 신체 사이즈를 입력해주시면 꼭 맞는 최적의 옷과 코디를 추천해 드립니다.</p>
+        <div class="modal-toggle-row">
+          <label class="modal-spec-toggle">
+            <span>내 스펙 기반 추천 사용</span>
+            <span class="modal-switch">
+              <input type="checkbox" id="specEnabledSwitch" onchange="toggleSpecEnabled(event)" />
+              <span class="slider"></span>
+            </span>
+          </label>
+          <span class="toggle-state" id="specEnabledState">ON</span>
+        </div>
+        <form id="specForm" onsubmit="handleSpecSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">성별 *</label>
+            <div class="form-radio-group">
+              <label class="form-radio-label">
+                <input type="radio" name="gender" value="male" required /> 남성
+              </label>
+              <label class="form-radio-label">
+                <input type="radio" name="gender" value="female" required /> 여성
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="specAge">연령대 *</label>
+              <select id="specAge" class="form-select" required>
+                <option value="">선택하세요</option>
+                <option value="10">10대</option>
+                <option value="20">20대</option>
+                <option value="30">30대</option>
+                <option value="40">40대 이상</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="specHeight">키 (cm) *</label>
+              <input type="number" id="specHeight" class="form-input" placeholder="예: 175" min="100" max="250" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="specWeight">몸무게 (kg) *</label>
+              <input type="number" id="specWeight" class="form-input" placeholder="예: 68" min="30" max="200" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="specTopSize">상의 사이즈 *</label>
+              <select id="specTopSize" class="form-select" required>
+                <option value="">선택하세요</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL 이상</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="specBottomSize">하의 사이즈 *</label>
+            <select id="specBottomSize" class="form-select" required>
+              <option value="">선택하세요</option>
+              <option value="26">26 이하</option>
+              <option value="28">28 (S)</option>
+              <option value="30">30 (M)</option>
+              <option value="32">32 (L)</option>
+              <option value="34">34 (XL)</option>
+              <option value="36">36 이상</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="modal-cancel-btn" onclick="closeSpecModal()">취소</button>
+            <button type="button" class="modal-allview-btn" onclick="handleSpecAllView()">전체 보기</button>
+            <button type="submit" class="modal-submit-btn">저장하기</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
